@@ -3,8 +3,10 @@ bold=$(tput smso)
 offbold=$(tput sgr0)
 echo "#####################################################################################
       my_azure.sh by Robert Sherwin (robsherw@cisco.com)  ©2018 Cisco .:|:.:|:. 
-Using openssl, this script will create a self-signed certificate for you to use in
-order to complete the Mailbox Settings configuration for ESA. 
+Using openssl, this script will create a self-signed certificate for you to use in order to 
+complete either the Mailbox Settings configuration for Mailbox Auto Remediation (MAR) 
+for Cisco Email Security, or the certificate setup steps needed for Office 365 Threat 
+Analyzer configuration.  
 Please respond to the following prompts: 
 #####################################################################################
 "
