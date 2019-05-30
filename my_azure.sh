@@ -1,40 +1,38 @@
 clear
-bold=$(tput smso)
-offbold=$(tput sgr0)
 echo "#####################################################################################
-      my_azure.sh by Robert Sherwin (robsherw@cisco.com)  ©2018 Cisco .:|:.:|:. 
-Using openssl, this script will create a self-signed certificate for you to use in order to 
-complete either the Mailbox Settings configuration for Mailbox Auto Remediation (MAR) 
-for Cisco Email Security, or the certificate setup steps needed for Office 365 Threat 
-Analyzer configuration.  
-Please respond to the following prompts: 
+      my_azure.sh by Robert Sherwin (robsherw@cisco.com)  ©2019 Cisco .:|:.:|:.
+Using openssl, this script will create a self-signed certificate for you to use in
+order to complete the Mailbox Settings configuration for Cisco Email Security.
+Please respond to the following prompts:
 #####################################################################################
 "
 if which openssl >/dev/null; then
-    echo "openssl is installed!" & openssl version
+    echo "openssl check passed: openssl is installed!" & openssl version
 else
     echo "You do not appear to have openssl installed." && exit
 fi
 
 echo "
-Please enter a name for your cert: "
+Please enter a name for your certificate: "
 read my_cert
 
 while [ -f $my_cert.key ];
 do
-	echo "File exists, please enter a name for your cert: " && read my_cert 
+	echo "File exists, please enter a name for your certificate: " && read my_cert
 done
 
 echo "
-Thank you.  The files that will be generated for your cert are: "
+Thank you.  The files that will be generated for your certificate are: "
 
 crt=$my_cert.crt
 key=$my_cert.key
 pem=$my_cert.pem
+txt=$my_cert.txt
 
-echo $crt
-echo $key
-echo $pem
+echo $crt "---> CER file of your certificate (public key)"
+echo $pem "---> PEM file of your certificate (private key)"
+echo $key "---> Your self-signed RSA private .key output"
+echo $txt "---> TXT file containing a recording of the needed values created from this script"
 echo ""
 
 while true; do
@@ -49,27 +47,22 @@ base64Thumbprint=`openssl x509 -outform der -in $crt | openssl dgst -binary -sha
 base64Value=`openssl x509 -outform der -in $crt | openssl base64 -A`
 keyid=`python -c "import uuid; print(uuid.uuid4())"`
 echo "
-##########################################################################
-Copy the following to Azure for your manifest:
-##########################################################################
-"
-echo "\"keyCredentials\": [
-{
-\"customKeyIdentifier\": \"$base64Thumbprint\",
-\"keyId\": \"$keyid\",
-\"type\": \"AsymmetricX509Cert\",
-\"usage\": \"Verify\",
-\"value\": \"$base64Value\"
-}
-],"
-echo "
-##########################################################################
-Complete the Azure configuration to get the $(tput smso)Client ID$(tput sgr0) and $(tput smso)Tenant ID$(tput sgr0).
-##########################################################################
-"
-echo "This is the $(tput smso)Thumbprint$(tput sgr0) for the ESA configuration: $base64Thumbprint"
-echo "This is the $(tput smso)Certificate Private Key$(tput sgr0) for the ESA configuration: $pem
-"; break;;
+################################################################################
+Next, log-in to Microsoft Azure and use the following for your App registration:
+################################################################################
+
+$(tput smul)Complete$(tput rmul) the Azure App registration (Certificate & secrets) using this $(tput smso)certificate (public key)$(tput sgr0): $crt"| tee -a $txt
+echo "$(tput smul)Complete$(tput rmul) the Azure App registration (API permissions)
+View & save your $(tput smso)Client ID$(tput sgr0) and $(tput smso)Tenant ID$(tput sgr0)
+
+########################################################
+After successful Azure App registration, from Cisco ESA:
+########################################################
+
+Use the $(tput smso)Client ID$(tput sgr0) and $(tput smso)Tenant ID$(tput sgr0) copied from your Azure App registration
+The $(tput smso)Thumbprint$(tput sgr0) to use for your ESA configuration: $base64Thumbprint" | tee -a $txt
+echo "The $(tput smso)Certificate Private Key$(tput sgr0) to use for your ESA configuration: $pem
+" | tee -a $txt; break;;
         [Nn]* ) exit;;
         * ) echo "Please answer yes or no.";;
     esac
@@ -78,8 +71,8 @@ while true; do
     read -p "Do you wish to review this certificate in detail? $(tput smso)(y/n)$(tput sgr0) " yn
     case $yn in
         [Yy]* ) openssl x509 -in $crt -text; echo "
-Thank you!" && break;;
-        [Nn]* ) echo "Thank you!" && exit;;
+Thank you! Be sure to keep up-to-date from https://docs.ces.cisco.com" && break;;
+        [Nn]* ) echo "Thank you!  Be sure to keep up-to-date from https://docs.ces.cisco.com" && exit;;
         * ) echo "Please answer yes or no.";;
     esac
 done
