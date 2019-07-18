@@ -1,3 +1,4 @@
+#!/bin/bash
 clear
 echo "#####################################################################################
       my_azure.sh by Robert Sherwin (robsherw@cisco.com)  ©2019 Cisco .:|:.:|:.
@@ -36,8 +37,8 @@ echo $txt "---> TXT file containing a recording of the needed values created fro
 echo ""
 
 while true; do
-    read -p "Are you ready to proceed and generate these files for your configuration? $(tput smso)(y/n)$(tput sgr0) " yn
-    case $yn in
+    read -p "Are you ready to proceed and generate these files for your configuration? (y/n) " yn
+    case "$yn" in
         [Yy]* ) openssl req -x509 -sha256 -nodes -days 1825 -newkey rsa:2048 -keyout $key -out $crt
 openssl rsa -in $key -out $key
 cat $key $crt > $pem
@@ -51,24 +52,24 @@ echo "
 Next, log-in to Microsoft Azure and use the following for your App registration:
 ################################################################################
 
-$(tput smul)Complete$(tput rmul) the Azure App registration (Certificate & secrets) using this $(tput smso)certificate (public key)$(tput sgr0): $crt"| tee -a $txt
-echo "$(tput smul)Complete$(tput rmul) the Azure App registration (API permissions)
-View & save your $(tput smso)Client ID$(tput sgr0) and $(tput smso)Tenant ID$(tput sgr0)
+Complete the Azure App registration (Certificate & secrets) using this certificate (public key): $crt"| tee -a $txt
+echo "Complete the Azure App registration (API permissions)
+View & save your Client ID and Tenant ID$
 
 ########################################################
 After successful Azure App registration, from Cisco ESA:
 ########################################################
 
-Use the $(tput smso)Client ID$(tput sgr0) and $(tput smso)Tenant ID$(tput sgr0) copied from your Azure App registration
-The $(tput smso)Thumbprint$(tput sgr0) to use for your ESA configuration: $base64Thumbprint" | tee -a $txt
-echo "The $(tput smso)Certificate Private Key$(tput sgr0) to use for your ESA configuration: $pem
+Use the Client ID and Tenant ID copied from your Azure App registration
+The Thumbprint to use for your ESA configuration: $base64Thumbprint" | tee -a $txt
+echo "The Certificate Private Key to use for your ESA configuration: $pem
 " | tee -a $txt; break;;
         [Nn]* ) exit;;
         * ) echo "Please answer yes or no.";;
     esac
 done
 while true; do
-    read -p "Do you wish to review this certificate in detail? $(tput smso)(y/n)$(tput sgr0) " yn
+    read -p "Do you wish to review this certificate in detail? (y/n) " yn
     case $yn in
         [Yy]* ) openssl x509 -in $crt -text; echo "
 Thank you! Be sure to keep up-to-date from https://docs.ces.cisco.com" && break;;
